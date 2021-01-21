@@ -19,13 +19,14 @@ const optionsDB = {
   connectionLimit: 5
 }
 
+const conexaorMariadb = mariadb.createPool(optionsDB);
 setInterval(() => {
   http.get(optionsNobreak1, (res) => {
     let data = '';
     res.on('data', (collect) => { data += collect; });
-    res.on('end', () => {
+    res.on('end', async () => {
       try {
-        asyncFunction(data, "logsnobreak");
+        await asyncFunction(data, "logsnobreak");
       } catch (e) {
         console.error(e.message);
       }
@@ -37,9 +38,9 @@ setInterval(() => {
   http.get(optionsNobreak2, (res) => {
     let data = '';
     res.on('data', (collect) => { data += collect; });
-    res.on('end', () => {
+    res.on('end', async () => {
       try {
-        asyncFunction(data, "logsnobreak2");
+        await asyncFunction(data, "logsnobreak2");
       } catch (e) {
         console.error(e.message);
       }
@@ -53,22 +54,18 @@ async function asyncFunction(dataref,tabela){
   const tratamento = dataref.replace(/[\(,\),\%]/g,"").replace("&#176;","");
   const arrayData = tratamento.split(/\s/g);
   const sqlTab = `INSERT INTO ${tabela} (entradaR,entradaS,entradaT,entradaFreq,bypassR,bypassS,bypassT,freqBypass,saidaR,saidaS,saidaT,freqSaida,potSaidaAparentR,potSaidaAparentS,potSaidaAparentT,potSaidaAtivaR,potSaidaAtivaS,potSaidaAtivaT,correnteSaidaR,correnteSaidaS,correnteSaidaT,barramento,bateria,temperatura) VALUES (${arrayData[0]},${arrayData[2]},${arrayData[4]},${arrayData[6]},${arrayData[8]},${arrayData[10]},${arrayData[12]},${arrayData[14]},${arrayData[16]},${arrayData[18]},${arrayData[20]},${arrayData[22]},${arrayData[24]},${arrayData[27]},${arrayData[30]},${arrayData[33]},${arrayData[36]},${arrayData[39]},${arrayData[42]},${arrayData[45]},${arrayData[48]},${arrayData[51]},${arrayData[53]},${arrayData[55]})`;
-  mariadb.createConnection(optionsDB)
-    .then(conn => {
-      conn.query(sqlTab)
-        .then(() => {
-          conn.end();          
-        })
-        .catch(err => { 
-          console.error(err);
-          throw err;
-        });
-    })
-    .catch(err => {
-      console.error(err);
-      throw err;
-    });
+  let conn;
+  try{
+    conn = conexaorMariadb.getConnection();
+    (await conn).query(sqlTab)    
+  }catch(e){
+    console.log(e);
+    throw e;
   }
+  if(conn){
+    (await conn).end();
+  }
+}
 
   // process.on('SIGINT', async () => {
   //   let status = 0
