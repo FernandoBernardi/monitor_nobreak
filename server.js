@@ -1,6 +1,7 @@
 const http = require('http');
 const mariadb = require('mariadb');
 const interval = require('interval-promise');
+//Conexão com o banco e url para pegar as informações
 const optionsNobreak1 = {
     host: '192.168.0.1',
     port: '64111',
@@ -19,8 +20,9 @@ const optionsDB = {
   database: 'logsnobreak',
   connectionLimit: 5
 }
-
 const conexaorMariadb = mariadb.createPool(optionsDB);
+
+// Função para buscar informações da url 1
 function get_nobreak_1(){
   http.get(optionsNobreak1, (res) => {
     let data = '';
@@ -32,27 +34,27 @@ function get_nobreak_1(){
         console.error(e.message);
       }
     });
-}).on("error", (e) => {
-  console.error("Error: " + e.message);
-});
+  }).on("error", (e) => {
+    console.error("Error: " + e.message);
+  });
 }
-
+// Função para buscar informações da url 2
 function get_nobreak_2(){
   http.get(optionsNobreak2, (res) => {
-      let data = '';
-      res.on('data', (collect) => { data += collect; });
-      res.on('end', async () => {
-        try {
-          await asyncFunction(data, "logsnobreak2");
-        } catch (e) {
-          console.error(e.message);
-        }
-      });
-    }).on("error", (e) => {
-    console.error("Error: " + e.message);
+    let data = '';
+    res.on('data', (collect) => { data += collect; });
+    res.on('end', async () => {
+      try {
+        await asyncFunction(data, "logsnobreak2");
+      } catch (e) {
+        console.error(e.message);
+      }
     });
+  }).on("error", (e) => {
+  console.error("Error: " + e.message);
+  });
 }
-
+// Armazenar no banco de dados as informações
 async function asyncFunction(dataref,tabela){
   const tratamento = dataref.replace(/[\(,\),\%]/g,"").replace("&#176;","");
   const arrayData = tratamento.split(/\s/g);
@@ -69,7 +71,7 @@ async function asyncFunction(dataref,tabela){
     }      
   }
 }
-
+// Intervalo com Promisse para aguardar o resultado e não criar várias Instâncias!
 interval(async () => {
   await get_nobreak_1();
   await get_nobreak_2();
