@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "express": "^4.17.1",
+    "interval-promise": "^1.4.0",
     "mariadb": "^2.4.2"
   },
   "devDependencies": {},

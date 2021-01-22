@@ -1,5 +1,6 @@
 const http = require('http');
 const mariadb = require('mariadb');
+const interval = require('interval-promise');
 const optionsNobreak1 = {
     host: '192.168.0.1',
     port: '64111',
@@ -20,7 +21,7 @@ const optionsDB = {
 }
 
 const conexaorMariadb = mariadb.createPool(optionsDB);
-setInterval(() => {
+function get_nobreak_1(){
   http.get(optionsNobreak1, (res) => {
     let data = '';
     res.on('data', (collect) => { data += collect; });
@@ -34,21 +35,23 @@ setInterval(() => {
 }).on("error", (e) => {
   console.error("Error: " + e.message);
 });
+}
 
+function get_nobreak_2(){
   http.get(optionsNobreak2, (res) => {
-    let data = '';
-    res.on('data', (collect) => { data += collect; });
-    res.on('end', async () => {
-      try {
-        await asyncFunction(data, "logsnobreak2");
-      } catch (e) {
-        console.error(e.message);
-      }
+      let data = '';
+      res.on('data', (collect) => { data += collect; });
+      res.on('end', async () => {
+        try {
+          await asyncFunction(data, "logsnobreak2");
+        } catch (e) {
+          console.error(e.message);
+        }
+      });
+    }).on("error", (e) => {
+    console.error("Error: " + e.message);
     });
-  }).on("error", (e) => {
-  console.error("Error: " + e.message);
-  });
-}, 1000);
+}
 
 async function asyncFunction(dataref,tabela){
   const tratamento = dataref.replace(/[\(,\),\%]/g,"").replace("&#176;","");
@@ -67,12 +70,7 @@ async function asyncFunction(dataref,tabela){
   }
 }
 
-  // process.on('SIGINT', async () => {
-  //   let status = 0
-  //   try {
-  //     await createConnection.end();
-  //   } catch (err) {
-  //     status = 1;
-  //   }
-  //   process.exit(status)
-  // });
+interval(async () => {
+  await get_nobreak_1();
+  await get_nobreak_2();
+}, 1000)
