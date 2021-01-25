@@ -60,11 +60,12 @@ async function asyncFunction(dataref,tabela){
   try{
     conn = await conexaorMariadb.getConnection();
     await conn.query(sqlTab);   
-  }catch(err){
+  } catch(err){
+    console.log(err);
     throw err;
   } finally {
     if (conn){
-     return conn.end();
+     conn.end();
     }      
   }
 }
