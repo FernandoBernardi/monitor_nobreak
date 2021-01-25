@@ -22,9 +22,9 @@ const optionsDB = {
 }
 const conexaorMariadb = mariadb.createPool(optionsDB);
 
-// Função para buscar informações da url 1
-function get_nobreak_1(){
-  http.get(optionsNobreak1, (res) => {
+// Função para buscar informações
+async function get_nobreak(){
+  await http.get(optionsNobreak1, (res) => {
     let data = '';
     res.on('data', (collect) => { data += collect; });
     res.on('end', async () => {
@@ -37,10 +37,7 @@ function get_nobreak_1(){
   }).on("error", (e) => {
     console.error("Error: " + e.message);
   });
-}
-// Função para buscar informações da url 2
-function get_nobreak_2(){
-  http.get(optionsNobreak2, (res) => {
+  await http.get(optionsNobreak2, (res) => {
     let data = '';
     res.on('data', (collect) => { data += collect; });
     res.on('end', async () => {
@@ -67,12 +64,11 @@ async function asyncFunction(dataref,tabela){
     throw err;
   } finally {
     if (conn){
-     return conn.release();
+     return conn.end();
     }      
   }
 }
 // Intervalo com Promisse para aguardar o resultado e não criar várias Instâncias!
 interval(async () => {
-  await get_nobreak_1();
-  await get_nobreak_2();
+  await get_nobreak();
 }, 1000)
