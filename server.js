@@ -1,17 +1,6 @@
-const http = require('http');
 const mariadb = require('mariadb');
-const interval = require('interval-promise');
+const axios = require('axios');
 //Conexão com o banco e url para pegar as informações
-const optionsNobreak1 = {
-    host: '192.168.0.1',
-    port: '64111',
-    path: '/medicoes.cgi'
-}
-const optionsNobreak2 = {
-  host: '192.168.0.1',
-  port: '64112',
-  path: '/medicoes.cgi'
-}
 const optionsDB = {
   host: '127.0.0.1',
   port: '3306',
@@ -22,34 +11,28 @@ const optionsDB = {
 }
 const conexaorMariadb = mariadb.createPool(optionsDB);
 
-// Função para buscar informações
+// Função para buscar informações servidor
 async function get_nobreak(){
-  await http.get(optionsNobreak1, (res) => {
-    let data = '';
-    res.on('data', (collect) => { data += collect; });
-    res.on('end', async () => {
-      try {
-        await asyncFunction(data, "logsnobreak");
-      } catch (e) {
-        console.error(e.message);
-      }
-    });
-  }).on("error", (e) => {
-    console.error("Error: " + e.message);
-  });
-  await http.get(optionsNobreak2, (res) => {
-    let data = '';
-    res.on('data', (collect) => { data += collect; });
-    res.on('end', async () => {
-      try {
-        await asyncFunction(data, "logsnobreak2");
-      } catch (e) {
-        console.error(e.message);
-      }
-    });
-  }).on("error", (e) => {
-  console.error("Error: " + e.message);
-  });
+  try{
+    // Nobreak 1
+    await axios.get("http://192.168.0.1:64111/medicoes.cgi")
+    .then(response => {
+      asyncFunction(response.data, "logsnobreak");
+    })
+    .catch(error => {
+      console.log(error);
+    })
+    // Nobreak 2
+    await axios.get("http://192.168.0.1:64112/medicoes.cgi")
+    .then(response => {
+      asyncFunction(response.data, "logsnobreak2");
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  }catch(error){
+    console.log(error);
+  }
 }
 // Armazenar no banco de dados as informações
 async function asyncFunction(dataref,tabela){
@@ -70,6 +53,6 @@ async function asyncFunction(dataref,tabela){
   }
 }
 // Intervalo com Promisse para aguardar o resultado e não criar várias Instâncias!
-interval(async () => {
+setInterval(async () => {
   await get_nobreak();
 }, 1000)

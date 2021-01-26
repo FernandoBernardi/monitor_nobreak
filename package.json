@@ -4,8 +4,7 @@
   "description": "Monitor link local nobreak",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.17.1",
-    "interval-promise": "^1.4.0",
+    "axios": "^0.21.1",
     "mariadb": "^2.4.2"
   },
   "devDependencies": {},
