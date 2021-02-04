@@ -17,33 +17,35 @@ async function get_nobreak() {
     try {
         // Nobreak 1
         axios.get("http://192.168.0.1:64111/medicoes.cgi")
-        .then(async response => {
-            try {
-                await insertDB(response.data, "logsnobreak");
-            } catch (err) {
-                throw new Error("Não foi possível inserir no banco de dados");
-            }
-        })
-        .catch(err => {
-            console.error(err.stack);
-            throw new Error("Não foi possível coletar as informações nobreak 1");
-        })
-        
+            .then(async response => {
+                try {
+                    await insertDB(response.data, "logsnobreak");
+                } catch (err) {
+                    throw new Error("Não foi possível inserir no banco de dados");
+                }
+            })
+            .catch(err => {
+                console.error(err.stack);
+                throw new Error("Não foi possível coletar as informações nobreak 1");
+            })
+
         // Nobreak 2
         axios.get("http://192.168.0.1:64112/medicoes.cgi")
-        .then(async response => {
-            try {
-                await insertDB(response.data, "logsnobreak2");
-            } catch (err) {
-                throw new Error("Não foi possível inserir no banco de dados");
-            }
-        })
-        .catch(err => {
-            console.error(err.stack);
-            throw new Error("Não foi possível coletar as informações nobreak 2");
-        })
-    }catch (err) {
+            .then(async response => {
+                try {
+                    await insertDB(response.data, "logsnobreak2");
+                } catch (err) {
+                    throw new Error("Não foi possível inserir no banco de dados");
+                }
+            })
+            .catch(err => {
+                console.error(err.stack);
+                throw new Error("Não foi possível coletar as informações nobreak 2");
+            })
+    } catch (err) {
         console.error(err.stack);
+    } finally {
+        setTimeout(get_nobreak, 1000);
     }
 }
 // Armazenar no banco de dados as informações
@@ -77,17 +79,7 @@ function kill_old_process_node() {
         console.log(`stdout: ${stdout}`);
     });
 }
-
-// Intervalo buscar informações e inserir no banco
-setInterval(async() => {
-    try{            
-        await get_nobreak();
-    }catch(err){
-        console.error(err.stack);
-    }
-}, 1000);
-
-// Intervalo para matara processos antigos node
-setInterval(() => {
-    kill_old_process_node();
-}, 7200000);
+// Chama a função para começar o monitoramento
+get_nobreak();
+// Intervalo de duas hora para matar os processos que ficaram em aberto
+setInterval(() => { kill_old_process_node() }, 7200000);
