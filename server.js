@@ -9,77 +9,86 @@ app.use(express.json());
 const optionsDB = {
   host: "127.0.0.1",
   port: "3306",
-  user: "root",
-  password: "",
+  user: "nobreak",
+  password: "n0br3ak",
   database: "logsnobreak",
   connectionLimit: 5,
 };
+// const optionsDB = {
+//   host: "127.0.0.1",
+//   port: "3306",
+//   user: "root",
+//   password: "",
+//   database: "logsnobreak",
+//   connectionLimit: 5,
+// };
 const conexaorMariadb = mariadb.createPool(optionsDB);
 // Função para buscar informações servidor
 
-app.post("/", async (req, res, next) => {
-  // console.log(req.body.DATA);
-  logs_wattmeter(req.body.DATA);
-});
+// app.post("/", async (req, res, next) => {
+//   // console.log(req.body.DATA);
+//   logs_wattmeter(req.body.DATA);
+// });
 
-app.listen(1000, () => console.log("Escutando na porta 1000"));
+// app.listen(1000, () => console.log("Escutando na porta 1000"));
 
-async function logs_wattmeter(parms) {
-  let conn;
-  const dataAtual = new Date();
-  try {
-    const sqlTab =
-      "INSERT INTO logswattmeter (criado_em,VARMS,VBRMS,VCRMS,IARMS,IBRMS,ICRMS,VABRMS,VBCRMS,VCARMS,VABCTRMS,PA,PB,PC,PT,QA,QB,QC,QT,SA,SB,SC,ST,FPA,FPB,FPC,FPT,KVARHA,KVARHB,KVARHC,KVARHT,KWHA,KWHB,KWHC,KWHT,FREQ,TEMP,SERRS) VALUES ?";
-    const sqlQuery = [
-      dataAtual,    
-      parms.VARMS,
-      parms.VBRMS,
-      parms.VCRMS,
-      parms.IARMS,
-      parms.IBRMS,
-      parms.ICRMS,
-      parms.VABRMS,
-      parms.VBCRMS,
-      parms.VCARMS,
-      parms.VABCTRMS,
-      parms.PA,
-      parms.PB,
-      parms.PC,
-      parms.PT,
-      parms.QA,
-      parms.QB,
-      parms.QC,
-      parms.QT,
-      parms.SA,
-      parms.SB,
-      parms.SC,
-      parms.ST,
-      parms.FPA,
-      parms.FPB,
-      parms.FPC,
-      parms.FPT,
-      parms.KVARHA,
-      parms.KVARHB,
-      parms.KVARHC,
-      parms.KVARHT,
-      parms.KWHA,
-      parms.KWHB,
-      parms.KWHC,
-      parms.KWHT,
-      parms.FREQ,
-      parms.TEMP,
-      parms.SERRS,
-    ];
-    conn = await conexaorMariadb.getConnection();
-    await conn.query(sqlTab, [sqlQuery]);
-  } catch (err) {
-    console.error(err.stack);
-  } finally {
-    if (conn) {
-      conn.end();
-    }
-  }
-}
+// async function logs_wattmeter(parms) {
+//   let conn;
+//   const dataAtual = new Date();
+//   try {
+//     const sqlTab =
+//       "INSERT INTO logswattmeter (criado_em,VARMS,VBRMS,VCRMS,IARMS,IBRMS,ICRMS,VABRMS,VBCRMS,VCARMS,VABCTRMS,PA,PB,PC,PT,QA,QB,QC,QT,SA,SB,SC,ST,FPA,FPB,FPC,FPT,KVARHA,KVARHB,KVARHC,KVARHT,KWHA,KWHB,KWHC,KWHT,FREQ,TEMP,SERRS) VALUES ?";
+//     const sqlQuery = [
+//       dataAtual,    
+//       parms.VARMS,
+//       parms.VBRMS,
+//       parms.VCRMS,
+//       parms.IARMS,
+//       parms.IBRMS,
+//       parms.ICRMS,
+//       parms.VABRMS,
+//       parms.VBCRMS,
+//       parms.VCARMS,
+//       parms.VABCTRMS,
+//       parms.PA,
+//       parms.PB,
+//       parms.PC,
+//       parms.PT,
+//       parms.QA,
+//       parms.QB,
+//       parms.QC,
+//       parms.QT,
+//       parms.SA,
+//       parms.SB,
+//       parms.SC,
+//       parms.ST,
+//       parms.FPA,
+//       parms.FPB,
+//       parms.FPC,
+//       parms.FPT,
+//       parms.KVARHA,
+//       parms.KVARHB,
+//       parms.KVARHC,
+//       parms.KVARHT,
+//       parms.KWHA,
+//       parms.KWHB,
+//       parms.KWHC,
+//       parms.KWHT,
+//       parms.FREQ,
+//       parms.TEMP,
+//       parms.SERRS,
+//     ];
+//     conn = await conexaorMariadb.getConnection();
+//     await conn.query(sqlTab, [sqlQuery]);
+//   } catch (err) {
+//     console.error(err.stack);
+//   } finally {
+//     if (conn) {
+//       conn.end();
+//     }
+//   }
+// }
+
 async function get_nobreak() {
   try {
     // Nobreak 1
