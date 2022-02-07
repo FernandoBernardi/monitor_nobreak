@@ -7,7 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Conexão com o banco e url para pegar as informações
 const optionsDB = {
-  host: "127.0.0.1",
+  host: "localhost",
   port: "3306",
   user: "nobreak",
   password: "n0br3ak",
@@ -23,12 +23,6 @@ const optionsDB = {
 //   connectionLimit: 5,
 // };
 const conexaorMariadb = mariadb.createPool(optionsDB);
-const AxiosRequest = (baseURL) => {
-  return axios.create({
-    baseURL: baseURL,
-    timeout: 2000,
-  });
-};
 // Função para buscar informações servidor
 
 // app.post("/", async (req, res, next) => {
@@ -98,21 +92,33 @@ const AxiosRequest = (baseURL) => {
 async function getNobreakData() {
   try {
     // Nobreak 1
-    try {
-      const response = await AxiosRequest("http://192.168.0.1:64111").get("/medicoes.cgi");
-      await insertDB(response.data, "logsnobreak");
-    } catch (err) {
-      console.error(err.stack);
-      throw new Error("Não foi possível coletar as informações nobreak 1");
-    }
+    axios
+      .get("http://192.168.0.1:64111/medicoes.cgi")
+      .then(async (response) => {
+        try {
+          await insertDB(response.data, "logsnobreak");
+        } catch (err) {
+          throw new Error("Não foi possível inserir no banco de dados");
+        }
+      })
+      .catch((err) => {
+        console.error(err.stack);
+        throw new Error("Não foi possível coletar as informações nobreak 1");
+      });
     // Nobreak 2
-    try {
-      const response = await AxiosRequest("http://192.168.0.1:64112").get("/medicoes.cgi");
-      await insertDB(response.data, "logsnobreak2");
-    } catch (err) {
-      console.error(err.stack);
-      throw new Error("Não foi possível coletar as informações nobreak 1");
-    }
+    axios
+      .get("http://192.168.0.1:64112/medicoes.cgi")
+      .then(async (response) => {
+        try {
+          await insertDB(response.data, "logsnobreak2");
+        } catch (err) {
+          throw new Error("Não foi possível inserir no banco de dados");
+        }
+      })
+      .catch((err) => {
+        console.error(err.stack);
+        throw new Error("Não foi possível coletar as informações nobreak 1");
+      });
   } catch (err) {
     console.error(err.stack);
   } finally {
