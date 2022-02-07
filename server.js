@@ -23,6 +23,12 @@ const optionsDB = {
 //   connectionLimit: 5,
 // };
 const conexaorMariadb = mariadb.createPool(optionsDB);
+const AxiosRequest = (baseURL) => {
+  return axios.create({
+    baseURL: baseURL,
+    timeout: 2000,
+  });
+};
 // Função para buscar informações servidor
 
 // app.post("/", async (req, res, next) => {
@@ -39,7 +45,7 @@ const conexaorMariadb = mariadb.createPool(optionsDB);
 //     const sqlTab =
 //       "INSERT INTO logswattmeter (criado_em,VARMS,VBRMS,VCRMS,IARMS,IBRMS,ICRMS,VABRMS,VBCRMS,VCARMS,VABCTRMS,PA,PB,PC,PT,QA,QB,QC,QT,SA,SB,SC,ST,FPA,FPB,FPC,FPT,KVARHA,KVARHB,KVARHC,KVARHT,KWHA,KWHB,KWHC,KWHT,FREQ,TEMP,SERRS) VALUES ?";
 //     const sqlQuery = [
-//       dataAtual,    
+//       dataAtual,
 //       parms.VARMS,
 //       parms.VBRMS,
 //       parms.VCRMS,
@@ -89,41 +95,28 @@ const conexaorMariadb = mariadb.createPool(optionsDB);
 //   }
 // }
 
-async function get_nobreak() {
+async function getNobreakData() {
   try {
     // Nobreak 1
-    axios
-      .get("http://192.168.0.1:64111/medicoes.cgi")
-      .then(async (response) => {
-        try {
-          await insertDB(response.data, "logsnobreak");
-        } catch (err) {
-          throw new Error("Não foi possível inserir no banco de dados");
-        }
-      })
-      .catch((err) => {
-        console.error(err.stack);
-        throw new Error("Não foi possível coletar as informações nobreak 1");
-      });
-
+    try {
+      const response = await AxiosRequest("http://192.168.0.1:64111").get("/medicoes.cgi");
+      await insertDB(response.data, "logsnobreak");
+    } catch (err) {
+      console.error(err.stack);
+      throw new Error("Não foi possível coletar as informações nobreak 1");
+    }
     // Nobreak 2
-    axios
-      .get("http://192.168.0.1:64112/medicoes.cgi")
-      .then(async (response) => {
-        try {
-          await insertDB(response.data, "logsnobreak2");
-        } catch (err) {
-          throw new Error("Não foi possível inserir no banco de dados");
-        }
-      })
-      .catch((err) => {
-        console.error(err.stack);
-        throw new Error("Não foi possível coletar as informações nobreak 2");
-      });
+    try {
+      const response = await AxiosRequest("http://192.168.0.1:64112").get("/medicoes.cgi");
+      await insertDB(response.data, "logsnobreak2");
+    } catch (err) {
+      console.error(err.stack);
+      throw new Error("Não foi possível coletar as informações nobreak 1");
+    }
   } catch (err) {
     console.error(err.stack);
   } finally {
-    setTimeout(get_nobreak, 1000);
+    setTimeout(getNobreakData, 1000);
   }
 }
 // Armazenar no banco de dados as informações
@@ -145,7 +138,7 @@ async function insertDB(dataref, tabela) {
 }
 // Matar processos que estiverem em aberto
 function kill_old_process_node() {
-  exec("sudo pkill node", (error, stdout, stderr) => {
+  exec("pkill node", (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -158,7 +151,7 @@ function kill_old_process_node() {
   });
 }
 // Chama a função para começar o monitoramento
-get_nobreak();
+getNobreakData();
 // Intervalo de duas hora para matar os processos que ficaram em aberto
 setInterval(() => {
   kill_old_process_node();
